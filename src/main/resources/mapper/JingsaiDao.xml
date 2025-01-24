@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.JingsaiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.jingsai_name as jingsaiName
+        ,a.jingsai_uuid_number as jingsaiUuidNumber
+        ,a.jingsai_photo as jingsaiPhoto
+        ,a.jingsai_types as jingsaiTypes
+        ,a.jingsai_content as jingsaiContent
+        ,a.jingsai_delete as jingsaiDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.JingsaiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM jingsai  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.jingsaiName != '' and params.jingsaiName != null and params.jingsaiName != 'null' ">
+                and a.jingsai_name like CONCAT('%',#{params.jingsaiName},'%')
+            </if>
+            <if test=" params.jingsaiUuidNumber != '' and params.jingsaiUuidNumber != null and params.jingsaiUuidNumber != 'null' ">
+                and a.jingsai_uuid_number like CONCAT('%',#{params.jingsaiUuidNumber},'%')
+            </if>
+            <if test="params.jingsaiTypes != null and params.jingsaiTypes != ''">
+                and a.jingsai_types = #{params.jingsaiTypes}
+            </if>
+            <if test=" params.jingsaiContent != '' and params.jingsaiContent != null and params.jingsaiContent != 'null' ">
+                and a.jingsai_content like CONCAT('%',#{params.jingsaiContent},'%')
+            </if>
+            <if test="params.jingsaiDeleteStart != null and params.jingsaiDeleteStart != ''">
+                <![CDATA[  and a.jingsai_delete >= #{params.jingsaiDeleteStart}   ]]>
+            </if>
+            <if test="params.jingsaiDeleteEnd != null and params.jingsaiDeleteEnd != ''">
+                <![CDATA[  and a.jingsai_delete <= #{params.jingsaiDeleteEnd}   ]]>
+            </if>
+             <if test="params.jingsaiDelete != null and params.jingsaiDelete != ''">
+                and a.jingsai_delete = #{params.jingsaiDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
